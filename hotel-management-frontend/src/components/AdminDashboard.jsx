@@ -27,7 +27,7 @@ export default function AdminDashboard({ user, onLogout }) {
               </button>
             ))}
             <button className="nav-btn" onClick={onLogout}>
-              Logout
+              logout
             </button>
           </nav>
         </div>
