@@ -7,8 +7,7 @@ export default function LandingPage({ onShowLogin }) {
       <nav className="landing-nav">
         <div className="nav-container">
           <div className="logo">
-            <span className="logo-icon">🏨</span>
-            <span className="logo-text">Grand Hotel</span>
+            <img src="/caesars-logo.svg" alt="Caesars Palace" style={{height: '60px'}} />
           </div>
           <div className="nav-links">
             <a href="#home">Home</a>
@@ -29,8 +28,8 @@ export default function LandingPage({ onShowLogin }) {
       <section className="hero-section" id="home">
         <div className="hero-overlay"></div>
         <div className="hero-content">
-          <h1 className="hero-title">Welcome to Grand Hotel</h1>
-          <p className="hero-subtitle">Experience Luxury & Comfort Like Never Before</p>
+          <h1 className="hero-title">Welcome to Caesars Palace</h1>
+          <p className="hero-subtitle">Experience Legendary Luxury in Las Vegas Style</p>
           <div className="hero-buttons">
             <button className="btn btn-large btn-primary" onClick={() => onShowLogin('customer')}>
               Book Your Stay
@@ -144,21 +143,21 @@ export default function LandingPage({ onShowLogin }) {
                 <div className="contact-icon">📍</div>
                 <div>
                   <h4>Address</h4>
-                  <p>123 Hotel Street, City Center<br />Mumbai, Maharashtra 400001</p>
+                  <p>3570 Las Vegas Blvd South<br />Las Vegas, NV 89109</p>
                 </div>
               </div>
               <div className="contact-item">
                 <div className="contact-icon">📞</div>
                 <div>
                   <h4>Phone</h4>
-                  <p>+91 22 1234 5678<br />+91 22 8765 4321</p>
+                  <p>+1 (866) 227-5938<br />+1 (702) 731-7110</p>
                 </div>
               </div>
               <div className="contact-item">
                 <div className="contact-icon">✉️</div>
                 <div>
                   <h4>Email</h4>
-                  <p>info@grandhotel.com<br />reservations@grandhotel.com</p>
+                  <p>info@caesarspalace.com<br />reservations@caesarspalace.com</p>
                 </div>
               </div>
             </div>
@@ -179,8 +178,8 @@ export default function LandingPage({ onShowLogin }) {
         <div className="container">
           <div className="footer-content">
             <div className="footer-section">
-              <h4>Grand Hotel</h4>
-              <p>Your home away from home. Experience luxury and comfort at its finest.</p>
+              <h4>Caesars Palace</h4>
+              <p>Experience the grandeur of ancient Rome with modern luxury and world-class service.</p>
             </div>
             <div className="footer-section">
               <h4>Quick Links</h4>
@@ -199,7 +198,7 @@ export default function LandingPage({ onShowLogin }) {
             </div>
           </div>
           <div className="footer-bottom">
-            <p>&copy; 2025 Grand Hotel. All rights reserved.</p>
+            <p>&copy; 2025 Caesars Palace. All rights reserved.</p>
           </div>
         </div>
       </footer>

@@ -4,6 +4,7 @@ import API from '../api';
 export default function Payments() {
   const [payments, setPayments] = useState([]);
   const [reservations, setReservations] = useState([]);
+  const [roomServices, setRoomServices] = useState([]);
   const [form, setForm] = useState({ reservationId: '', amount: '', method: 'Cash' });
   const [message, setMessage] = useState({ type: '', text: '' });
 
@@ -13,11 +14,13 @@ export default function Payments() {
 
   const loadData = async () => {
     try {
-      const [paymentsRes, reservationsRes] = await Promise.all([
+      const [paymentsRes, reservationsRes, roomServicesRes] = await Promise.all([
         API.get('/payments'),
-        API.get('/reservations')
+        API.get('/reservations'),
+        API.get('/room-services')
       ]);
       setPayments(paymentsRes.data);
+      setRoomServices(roomServicesRes.data);
       // Only show reservations that are checked in or confirmed
       setReservations(
         reservationsRes.data.filter(r => r.Status === 'Confirmed' || r.Status === 'CheckedIn')
@@ -25,6 +28,30 @@ export default function Payments() {
     } catch (err) {
       showMessage('error', 'Failed to load data');
     }
+  };
+
+  const getRoomServiceCharges = (roomNo, checkInDate, checkOutDate) => {
+    const checkIn = new Date(checkInDate);
+    const checkOut = new Date(checkOutDate);
+    
+    return roomServices
+      .filter(rs => {
+        const serviceDate = new Date(rs.Service_Date);
+        return rs.Room_No === roomNo && 
+               serviceDate >= checkIn && 
+               serviceDate <= checkOut;
+      })
+      .reduce((sum, rs) => sum + parseFloat(rs.Total_Charge), 0);
+  };
+
+  const getTotalBill = (reservation) => {
+    const roomCharges = parseFloat(reservation.Total_Amount);
+    const serviceCharges = getRoomServiceCharges(
+      reservation.Room_No,
+      reservation.Check_In_Date,
+      reservation.Check_Out_Date
+    );
+    return roomCharges + serviceCharges;
   };
 
   const showMessage = (type, text) => {
@@ -75,20 +102,32 @@ export default function Payments() {
               value={form.reservationId}
               onChange={(e) => {
                 const reservation = reservations.find(r => r.Reservation_ID === parseInt(e.target.value));
-                setForm({
-                  ...form,
-                  reservationId: e.target.value,
-                  amount: reservation ? reservation.Total_Amount : ''
-                });
+                if (reservation) {
+                  const totalBill = getTotalBill(reservation);
+                  const totalPaid = getTotalPaid(reservation.Reservation_ID);
+                  const remaining = totalBill - totalPaid;
+                  setForm({
+                    ...form,
+                    reservationId: e.target.value,
+                    amount: remaining.toFixed(2)
+                  });
+                } else {
+                  setForm({
+                    ...form,
+                    reservationId: e.target.value,
+                    amount: ''
+                  });
+                }
               }}
             >
               <option value="">Select Reservation</option>
               {reservations.map((r) => {
+                const totalBill = getTotalBill(r);
                 const totalPaid = getTotalPaid(r.Reservation_ID);
-                const remaining = r.Total_Amount - totalPaid;
+                const remaining = totalBill - totalPaid;
                 return (
                   <option key={r.Reservation_ID} value={r.Reservation_ID}>
-                    #{r.Reservation_ID} - {r.GuestName} - Room {r.Room_No} (Total: ₹{r.Total_Amount}, Paid: ₹{totalPaid}, Due: ₹{remaining})
+                    #{r.Reservation_ID} - {r.GuestName} - Room {r.Room_No} (Total: ₹{totalBill.toFixed(2)}, Paid: ₹{totalPaid}, Due: ₹{remaining.toFixed(2)})
                   </option>
                 );
               })}

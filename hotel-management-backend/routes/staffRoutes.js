@@ -23,5 +23,31 @@ router.post('/', async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+// PUT update staff
+router.put('/:id', async (req, res) => {
+  try {
+    const staffId = req.params.id;
+    const { Name, Dept, Age, Contact_Info, Salary } = req.body;
+    await pool.query(
+      'UPDATE Staff SET Name = ?, Dept = ?, Age = ?, Contact_Info = ?, Salary = ? WHERE Staff_ID = ?',
+      [Name, Dept, Age, Contact_Info, Salary, staffId]
+    );
+    res.json({ message: 'Staff member updated successfully' });
+  } catch (err) { 
+    res.status(500).json({ error: err.message }); 
+  }
+});
+
+// DELETE staff
+router.delete('/:id', async (req, res) => {
+  try {
+    const staffId = req.params.id;
+    await pool.query('DELETE FROM Staff WHERE Staff_ID = ?', [staffId]);
+    res.json({ message: 'Staff member deleted successfully' });
+  } catch (err) { 
+    res.status(500).json({ error: err.message }); 
+  }
+});
+
 module.exports = router;
 

@@ -13,7 +13,10 @@ export default function AdminDashboard({ user, onLogout }) {
   return (
     <div>
       <header className="app-header">
-        <h1>🏨 Hotel Management - Admin</h1>
+        <div style={{display: 'flex', alignItems: 'center', gap: '15px'}}>
+          <img src="/caesars-logo.svg" alt="Caesars Palace" style={{height: '50px'}} />
+          <h1>Caesars Palace - Admin</h1>
+        </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <span>Admin: {user.name}</span>
           <nav>

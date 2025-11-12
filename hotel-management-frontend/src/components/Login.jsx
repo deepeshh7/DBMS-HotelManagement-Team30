@@ -33,7 +33,8 @@ export default function Login({ onLogin, loginType, onBack }) {
           ← Back to Home
         </button>
         
-        <h2>🏨 {isAdmin ? 'Admin Login' : 'Guest Booking'}</h2>
+        <img src="/caesars-logo.svg" alt="Caesars Palace" style={{height: '80px', marginBottom: '20px'}} />
+        <h2>{isAdmin ? 'Admin Login' : 'Guest Booking'}</h2>
         <p className="auth-subtitle">
           {isAdmin ? 'Access the admin dashboard' : 'Enter your details to book a room'}
         </p>

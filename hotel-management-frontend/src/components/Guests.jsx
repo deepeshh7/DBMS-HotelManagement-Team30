@@ -46,6 +46,21 @@ export default function Guests() {
     }
   };
 
+  const deleteGuest = async (id, name) => {
+    const confirmed = window.confirm(
+      `Are you sure you want to delete ${name}?\n\nNote: This will also delete all their reservations and payment records.`
+    );
+    if (!confirmed) return;
+
+    try {
+      await API.delete(`/guests/${id}`);
+      await loadGuests();
+      showMessage('success', 'Guest deleted successfully');
+    } catch (err) {
+      showMessage('error', err.response?.data?.error || 'Failed to delete guest');
+    }
+  };
+
   return (
     <div>
       <h2 className="page-title">Guest Management</h2>
@@ -123,6 +138,7 @@ export default function Guests() {
             <th>Nationality</th>
             <th>Gender</th>
             <th>Status</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -138,6 +154,17 @@ export default function Guests() {
                 <span className={`status-badge ${g.Check_In_Status ? 'status-occupied' : 'status-available'}`}>
                   {g.Check_In_Status ? 'Checked-in' : 'Not Checked-in'}
                 </span>
+              </td>
+              <td>
+                <button 
+                  className="btn btn-danger btn-sm" 
+                  onClick={() => deleteGuest(g.Guest_ID, g.Name)}
+                  disabled={g.Check_In_Status}
+                  title={g.Check_In_Status ? 'Cannot delete checked-in guest' : 'Delete guest'}
+                  style={{ opacity: g.Check_In_Status ? 0.5 : 1 }}
+                >
+                  Delete
+                </button>
               </td>
             </tr>
           ))}

@@ -5,6 +5,7 @@ export default function Reservations() {
   const [reservations, setReservations] = useState([]);
   const [guests, setGuests] = useState([]);
   const [rooms, setRooms] = useState([]);
+  const [roomServices, setRoomServices] = useState([]);
   const [form, setForm] = useState({ guestId: '', roomNo: '', checkIn: '', checkOut: '' });
   const [message, setMessage] = useState({ type: '', text: '' });
 
@@ -14,17 +15,43 @@ export default function Reservations() {
 
   const loadData = async () => {
     try {
-      const [reservationsRes, guestsRes, roomsRes] = await Promise.all([
+      const [reservationsRes, guestsRes, roomsRes, roomServicesRes] = await Promise.all([
         API.get('/reservations'),
         API.get('/guests'),
-        API.get('/rooms')
+        API.get('/rooms'),
+        API.get('/room-services')
       ]);
       setReservations(reservationsRes.data);
       setGuests(guestsRes.data);
       setRooms(roomsRes.data.filter(r => r.Status === 'Available'));
+      setRoomServices(roomServicesRes.data);
     } catch (err) {
       showMessage('error', 'Failed to load data');
     }
+  };
+
+  const getRoomServiceCharges = (roomNo, checkInDate, checkOutDate) => {
+    const checkIn = new Date(checkInDate);
+    const checkOut = new Date(checkOutDate);
+    
+    return roomServices
+      .filter(rs => {
+        const serviceDate = new Date(rs.Service_Date);
+        return rs.Room_No === roomNo && 
+               serviceDate >= checkIn && 
+               serviceDate <= checkOut;
+      })
+      .reduce((sum, rs) => sum + parseFloat(rs.Total_Charge), 0);
+  };
+
+  const getTotalBill = (reservation) => {
+    const roomCharges = parseFloat(reservation.Total_Amount);
+    const serviceCharges = getRoomServiceCharges(
+      reservation.Room_No, 
+      reservation.Check_In_Date, 
+      reservation.Check_Out_Date
+    );
+    return roomCharges + serviceCharges;
   };
 
   const showMessage = (type, text) => {
@@ -139,13 +166,18 @@ export default function Reservations() {
             <th>Room</th>
             <th>Check-in</th>
             <th>Check-out</th>
-            <th>Amount</th>
+            <th>Room Charges</th>
+            <th>Service Charges</th>
+            <th>Total Bill</th>
             <th>Status</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          {reservations.map((r) => (
+          {reservations.map((r) => {
+            const serviceCharges = getRoomServiceCharges(r.Room_No, r.Check_In_Date, r.Check_Out_Date);
+            const totalBill = getTotalBill(r);
+            return (
             <tr key={r.Reservation_ID}>
               <td>#{r.Reservation_ID}</td>
               <td>{r.GuestName}</td>
@@ -153,6 +185,12 @@ export default function Reservations() {
               <td>{new Date(r.Check_In_Date).toLocaleDateString()}</td>
               <td>{new Date(r.Check_Out_Date).toLocaleDateString()}</td>
               <td>₹{r.Total_Amount}</td>
+              <td style={{ color: serviceCharges > 0 ? '#B8860B' : '#666' }}>
+                ₹{serviceCharges.toFixed(2)}
+              </td>
+              <td style={{ fontWeight: 'bold', color: '#B8860B' }}>
+                ₹{totalBill.toFixed(2)}
+              </td>
               <td>
                 <span className={`status-badge status-${r.Status.toLowerCase()}`}>
                   {r.Status}
@@ -187,7 +225,8 @@ export default function Reservations() {
                 </div>
               </td>
             </tr>
-          ))}
+            );
+          })}
         </tbody>
       </table>
     </div>

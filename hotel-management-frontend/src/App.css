@@ -7,7 +7,7 @@
 
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #000;
   min-height: 100vh;
 }
 
@@ -17,8 +17,8 @@ body {
 
 /* Header Styles */
 .app-header {
-  background: white;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  background: #000;
+  box-shadow: 0 2px 10px rgba(184, 134, 11, 0.3);
   padding: 1rem 2rem;
   display: flex;
   justify-content: space-between;
@@ -26,12 +26,17 @@ body {
   position: sticky;
   top: 0;
   z-index: 100;
+  border-bottom: 2px solid #B8860B;
 }
 
 .app-header h1 {
-  color: #667eea;
-  font-size: 1.8rem;
+  color: #B8860B;
+  font-size: 2.2rem;
   font-weight: 700;
+}
+
+.app-header img {
+  height: 70px !important;
 }
 
 .app-header nav {
@@ -41,24 +46,24 @@ body {
 
 .nav-btn {
   background: transparent;
-  border: none;
-  padding: 0.6rem 1.2rem;
+  border: 2px solid #B8860B;
+  padding: 0.7rem 1.4rem;
   cursor: pointer;
   border-radius: 8px;
-  font-size: 0.95rem;
-  font-weight: 500;
-  color: #555;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #B8860B;
   transition: all 0.3s ease;
 }
 
 .nav-btn:hover {
-  background: #f0f0f0;
-  color: #667eea;
+  background: #B8860B;
+  color: #000;
 }
 
 .nav-btn.active {
-  background: #667eea;
-  color: white;
+  background: #B8860B;
+  color: #000;
 }
 
 /* Main Content */
@@ -76,10 +81,11 @@ body {
 }
 
 .page-title {
-  font-size: 2rem;
+  font-size: 2.5rem;
   color: #333;
   margin-bottom: 1.5rem;
-  font-weight: 600;
+  font-weight: 700;
+  letter-spacing: 1px;
 }
 
 /* Form Styles */
@@ -126,24 +132,26 @@ body {
 
 /* Button Styles */
 .btn {
-  padding: 0.75rem 1.5rem;
+  padding: 0.85rem 1.8rem;
   border: none;
   border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 600;
+  font-size: 1.1rem;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
+  letter-spacing: 0.5px;
 }
 
 .btn-primary {
-  background: #667eea;
-  color: white;
+  background: #B8860B;
+  color: #000;
+  font-weight: bold;
 }
 
 .btn-primary:hover {
-  background: #5568d3;
+  background: #DAA520;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 4px 12px rgba(184, 134, 11, 0.4);
 }
 
 .btn-success {
@@ -362,7 +370,7 @@ body {
   align-items: center;
   justify-content: center;
   padding: 2rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #000;
 }
 
 .auth-card {
@@ -381,7 +389,7 @@ body {
   left: 1.5rem;
   background: transparent;
   border: none;
-  color: #667eea;
+  color: #B8860B;
   font-size: 0.9rem;
   cursor: pointer;
   padding: 0.5rem;
@@ -389,16 +397,21 @@ body {
 }
 
 .back-button:hover {
-  color: #5568d3;
+  color: #DAA520;
   transform: translateX(-4px);
 }
 
 .auth-card h2 {
   text-align: center;
-  color: #667eea;
+  color: #B8860B;
   margin-bottom: 0.5rem;
   margin-top: 1rem;
-  font-size: 2rem;
+  font-size: 2.5rem;
+  letter-spacing: 1px;
+}
+
+.auth-card img {
+  height: 100px !important;
 }
 
 .auth-subtitle {
@@ -444,17 +457,18 @@ html {
 
 /* Navigation */
 .landing-nav {
-  background: white;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  background: #000;
+  box-shadow: 0 2px 10px rgba(184, 134, 11, 0.3);
   position: sticky;
   top: 0;
   z-index: 1000;
+  border-bottom: 2px solid #B8860B;
 }
 
 .nav-container {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 1rem 2rem;
+  padding: 1.2rem 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -464,9 +478,13 @@ html {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: 1.5rem;
+  font-size: 2rem;
   font-weight: 700;
-  color: #667eea;
+  color: #B8860B;
+}
+
+.logo img {
+  height: 80px !important;
 }
 
 .logo-icon {
@@ -477,28 +495,29 @@ html {
   display: flex;
   align-items: center;
   gap: 2rem;
+  font-size: 1.1rem;
 }
 
 .nav-links a {
-  color: #555;
+  color: #B8860B;
   text-decoration: none;
   font-weight: 500;
   transition: color 0.3s;
 }
 
 .nav-links a:hover {
-  color: #667eea;
+  color: #DAA520;
 }
 
 .btn-outline {
   background: transparent;
-  border: 2px solid #667eea;
-  color: #667eea;
+  border: 2px solid #B8860B;
+  color: #B8860B;
 }
 
 .btn-outline:hover {
-  background: #667eea;
-  color: white;
+  background: #B8860B;
+  color: #000;
 }
 
 .btn-outline-white {
@@ -558,14 +577,15 @@ html {
 }
 
 .hero-title {
-  font-size: 4rem;
+  font-size: 5rem;
   font-weight: 700;
   margin-bottom: 1rem;
   text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+  letter-spacing: 2px;
 }
 
 .hero-subtitle {
-  font-size: 1.5rem;
+  font-size: 1.8rem;
   margin-bottom: 2rem;
   opacity: 0.95;
 }
@@ -586,10 +606,11 @@ html {
 
 .section-title {
   text-align: center;
-  font-size: 2.5rem;
+  font-size: 3rem;
   color: #333;
   margin-bottom: 3rem;
   font-weight: 700;
+  letter-spacing: 1px;
 }
 
 /* Features Section */
@@ -816,4 +837,27 @@ html {
   .data-table th, .data-table td {
     padding: 0.5rem;
   }
+}
+
+
+/* Caesars Palace Branding Updates */
+.hero-section {
+  background: url('https://i.imgur.com/caesars-pool.jpg') center/cover no-repeat !important;
+  background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), 
+              url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg"><rect fill="%2387CEEB" width="100%" height="100%"/></svg>') !important;
+  min-height: 600px;
+}
+
+.landing-page .hero-section {
+  background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)),
+                    url('https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=1920') !important;
+  background-size: cover;
+  background-position: center;
+}
+
+.auth-container {
+  background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)),
+                    url('https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=1920') !important;
+  background-size: cover;
+  background-position: center;
 }

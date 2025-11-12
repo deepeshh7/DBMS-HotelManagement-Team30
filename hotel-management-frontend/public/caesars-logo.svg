@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 150">
+  <defs>
+    <style>
+      .gold { fill: #B8860B; }
+      .text { fill: #B8860B; font-family: 'Arial Black', sans-serif; font-weight: bold; }
+    </style>
+  </defs>
+  
+  <!-- Left laurel -->
+  <path class="gold" d="M 40 75 Q 35 65 30 60 L 35 65 Q 30 55 28 50 L 33 58 Q 28 48 27 43 L 32 52 Q 27 42 26 37 L 31 47 Q 26 37 25 32 L 30 43 Q 25 33 24 28 L 29 40 L 35 75 Z"/>
+  <path class="gold" d="M 50 75 Q 55 65 60 60 L 55 65 Q 60 55 62 50 L 57 58 Q 62 48 63 43 L 58 52 Q 63 42 64 37 L 59 47 Q 64 37 65 32 L 60 43 Q 65 33 66 28 L 61 40 L 55 75 Z"/>
+  
+  <!-- Center circle with Caesar head -->
+  <circle class="gold" cx="45" cy="75" r="35"/>
+  <path fill="#000" d="M 45 50 Q 55 52 60 65 Q 60 80 50 88 Q 40 88 30 80 Q 30 65 35 52 Q 40 50 45 50 Z"/>
+  <circle fill="#B8860B" cx="45" cy="68" r="3"/>
+  
+  <!-- CAESAR'S PALACE text -->
+  <text x="100" y="65" class="text" font-size="32" letter-spacing="4">CAESAR'S</text>
+  <text x="100" y="95" class="text" font-size="32" letter-spacing="4">PALACE</text>
+</svg>

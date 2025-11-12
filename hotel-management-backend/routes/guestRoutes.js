@@ -21,5 +21,16 @@ router.post('/', async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+// DELETE guest
+router.delete('/:id', async (req, res) => {
+  try {
+    const guestId = req.params.id;
+    await pool.query('DELETE FROM Guest WHERE Guest_ID = ?', [guestId]);
+    res.json({ message: 'Guest deleted successfully' });
+  } catch (err) { 
+    res.status(500).json({ error: err.message }); 
+  }
+});
+
 module.exports = router;
 

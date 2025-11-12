@@ -10,6 +10,7 @@ export default function Staff() {
     Contact_Info: '',
     Salary: ''
   });
+  const [editingId, setEditingId] = useState(null);
   const [message, setMessage] = useState({ type: '', text: '' });
 
   useEffect(() => {
@@ -37,15 +38,53 @@ export default function Staff() {
     }
 
     try {
-      await API.post('/staff', {
-        ...form,
-        Join_Date: new Date().toISOString().split('T')[0]
-      });
+      if (editingId) {
+        // Update existing staff
+        await API.put(`/staff/${editingId}`, form);
+        showMessage('success', 'Staff member updated successfully');
+        setEditingId(null);
+      } else {
+        // Add new staff
+        await API.post('/staff', {
+          ...form,
+          Join_Date: new Date().toISOString().split('T')[0]
+        });
+        showMessage('success', 'Staff member added successfully');
+      }
       await loadStaff();
       setForm({ Name: '', Dept: '', Age: '', Contact_Info: '', Salary: '' });
-      showMessage('success', 'Staff member added successfully');
     } catch (err) {
-      showMessage('error', 'Failed to add staff member');
+      showMessage('error', editingId ? 'Failed to update staff member' : 'Failed to add staff member');
+    }
+  };
+
+  const editStaff = (s) => {
+    setForm({
+      Name: s.Name,
+      Dept: s.Dept,
+      Age: s.Age,
+      Contact_Info: s.Contact_Info,
+      Salary: s.Salary
+    });
+    setEditingId(s.Staff_ID);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const cancelEdit = () => {
+    setForm({ Name: '', Dept: '', Age: '', Contact_Info: '', Salary: '' });
+    setEditingId(null);
+  };
+
+  const deleteStaff = async (id, name) => {
+    const confirmed = window.confirm(`Are you sure you want to delete ${name}?`);
+    if (!confirmed) return;
+
+    try {
+      await API.delete(`/staff/${id}`);
+      await loadStaff();
+      showMessage('success', 'Staff member deleted successfully');
+    } catch (err) {
+      showMessage('error', err.response?.data?.error || 'Failed to delete staff member');
     }
   };
 
@@ -55,6 +94,12 @@ export default function Staff() {
 
       {message.text && (
         <div className={`alert alert-${message.type}`}>{message.text}</div>
+      )}
+
+      {editingId && (
+        <div className="alert alert-info">
+          Editing staff member. Update the details below and click "Update Staff".
+        </div>
       )}
 
       <div className="form-container">
@@ -114,8 +159,17 @@ export default function Staff() {
           </div>
           <div className="form-group">
             <button className="btn btn-primary" onClick={add}>
-              Add Staff
+              {editingId ? 'Update Staff' : 'Add Staff'}
             </button>
+            {editingId && (
+              <button 
+                className="btn btn-secondary" 
+                onClick={cancelEdit}
+                style={{ marginLeft: '0.5rem' }}
+              >
+                Cancel
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -130,6 +184,7 @@ export default function Staff() {
             <th>Contact</th>
             <th>Salary</th>
             <th>Join Date</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -142,6 +197,22 @@ export default function Staff() {
               <td>{s.Contact_Info}</td>
               <td>₹{s.Salary}</td>
               <td>{s.Join_Date ? new Date(s.Join_Date).toLocaleDateString() : 'N/A'}</td>
+              <td>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <button 
+                    className="btn btn-primary btn-sm" 
+                    onClick={() => editStaff(s)}
+                  >
+                    Edit
+                  </button>
+                  <button 
+                    className="btn btn-danger btn-sm" 
+                    onClick={() => deleteStaff(s.Staff_ID, s.Name)}
+                  >
+                    Delete
+                  </button>
+                </div>
+              </td>
             </tr>
           ))}
         </tbody>

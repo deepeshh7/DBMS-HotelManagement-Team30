@@ -5,6 +5,7 @@ export default function CustomerPortal({ user, onLogout }) {
   const [view, setView] = useState('browse'); // 'browse' | 'mybookings'
   const [rooms, setRooms] = useState([]);
   const [myBookings, setMyBookings] = useState([]);
+  const [roomServices, setRoomServices] = useState([]);
   const [loading, setLoading] = useState(false);
   const [filter, setFilter] = useState({ category: '', minPrice: '', maxPrice: '', checkIn: '', checkOut: '' });
   const [bookingForm, setBookingForm] = useState({ roomNo: null, checkIn: '', checkOut: '' });
@@ -28,10 +29,13 @@ export default function CustomerPortal({ user, onLogout }) {
 
   const loadMyBookings = async () => {
     try {
-      const [reservationsRes, guestsRes] = await Promise.all([
+      const [reservationsRes, guestsRes, roomServicesRes] = await Promise.all([
         API.get('/reservations'),
-        API.get('/guests')
+        API.get('/guests'),
+        API.get('/room-services')
       ]);
+      
+      setRoomServices(roomServicesRes.data);
       
       // Find current user's guest ID
       const currentGuest = guestsRes.data.find(g => g.Email === user.email);
@@ -43,6 +47,20 @@ export default function CustomerPortal({ user, onLogout }) {
     } catch (err) {
       console.error('Failed to load bookings');
     }
+  };
+
+  const getRoomServiceCharges = (roomNo, checkInDate, checkOutDate) => {
+    const checkIn = new Date(checkInDate);
+    const checkOut = new Date(checkOutDate);
+    
+    return roomServices
+      .filter(rs => {
+        const serviceDate = new Date(rs.Service_Date);
+        return rs.Room_No === roomNo && 
+               serviceDate >= checkIn && 
+               serviceDate <= checkOut;
+      })
+      .reduce((sum, rs) => sum + parseFloat(rs.Total_Charge), 0);
   };
 
   const showMessage = (type, text) => {
@@ -84,7 +102,7 @@ export default function CustomerPortal({ user, onLogout }) {
       }
 
       // Create reservation
-      await API.post('/reservations', {
+      const reservationRes = await API.post('/reservations', {
         guestId: guest.Guest_ID,
         roomNo: roomNo,
         checkIn: bookingForm.checkIn,
@@ -109,7 +127,10 @@ export default function CustomerPortal({ user, onLogout }) {
   return (
     <div>
       <header className="app-header">
-        <h1>🏨 Hotel Booking</h1>
+        <div style={{display: 'flex', alignItems: 'center', gap: '15px'}}>
+          <img src="/caesars-logo.svg" alt="Caesars Palace" style={{height: '50px'}} />
+          <h1>Caesars Palace</h1>
+        </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <span>Welcome, {user.name}</span>
           <nav>
@@ -203,6 +224,12 @@ export default function CustomerPortal({ user, onLogout }) {
               </div>
             </div>
 
+            {!bookingForm.checkIn || !bookingForm.checkOut ? (
+              <div className="alert alert-info">
+                📅 Please select your check-in and check-out dates above to enable booking
+              </div>
+            ) : null}
+
             {loading ? (
               <div className="loading">Loading rooms...</div>
             ) : (
@@ -226,11 +253,12 @@ export default function CustomerPortal({ user, onLogout }) {
                       )}
                       <button
                         className="btn btn-primary"
-                        style={{ width: '100%' }}
+                        style={{ width: '100%', opacity: (!bookingForm.checkIn || !bookingForm.checkOut) ? 0.5 : 1 }}
                         onClick={() => handleBookRoom(room.Room_No)}
                         disabled={!bookingForm.checkIn || !bookingForm.checkOut}
+                        title={(!bookingForm.checkIn || !bookingForm.checkOut) ? 'Please select check-in and check-out dates first' : 'Click to book this room'}
                       >
-                        Book Now
+                        {(!bookingForm.checkIn || !bookingForm.checkOut) ? 'Select Dates First' : 'Book Now'}
                       </button>
                     </div>
                   );
@@ -263,12 +291,17 @@ export default function CustomerPortal({ user, onLogout }) {
                     <th>Category</th>
                     <th>Check-in</th>
                     <th>Check-out</th>
-                    <th>Total Amount</th>
+                    <th>Room Charges</th>
+                    <th>Service Charges</th>
+                    <th>Total Bill</th>
                     <th>Status</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {myBookings.map((booking) => (
+                  {myBookings.map((booking) => {
+                    const serviceCharges = getRoomServiceCharges(booking.Room_No, booking.Check_In_Date, booking.Check_Out_Date);
+                    const totalBill = parseFloat(booking.Total_Amount) + serviceCharges;
+                    return (
                     <tr key={booking.Reservation_ID}>
                       <td>#{booking.Reservation_ID}</td>
                       <td>Room {booking.Room_No}</td>
@@ -276,13 +309,20 @@ export default function CustomerPortal({ user, onLogout }) {
                       <td>{new Date(booking.Check_In_Date).toLocaleDateString()}</td>
                       <td>{new Date(booking.Check_Out_Date).toLocaleDateString()}</td>
                       <td>₹{booking.Total_Amount}</td>
+                      <td style={{ color: serviceCharges > 0 ? '#B8860B' : '#666' }}>
+                        ₹{serviceCharges.toFixed(2)}
+                      </td>
+                      <td style={{ fontWeight: 'bold', color: '#B8860B' }}>
+                        ₹{totalBill.toFixed(2)}
+                      </td>
                       <td>
                         <span className={`status-badge status-${booking.Status.toLowerCase()}`}>
                           {booking.Status}
                         </span>
                       </td>
                     </tr>
-                  ))}
+                    );
+                  })}
                 </tbody>
               </table>
             )}
