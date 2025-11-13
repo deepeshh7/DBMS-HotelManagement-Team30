@@ -15,20 +15,36 @@ router.get('/', async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// POST make payment (calls stored procedure)
+// POST make payment (direct insert, bypassing stored procedure for service charges)
 router.post('/', async (req, res) => {
   try {
     const { reservationId, amount, method } = req.body;
-    const conn = await pool.getConnection();
-    try {
-      await conn.query('CALL MakePayment(?, ?, ?)', [reservationId, amount, method]);
-      res.json({ message: 'Payment recorded' });
-    } catch (spErr) {
-      res.status(400).json({ error: spErr.message });
-    } finally {
-      conn.release();
+    
+    // Validate inputs
+    if (!reservationId || !amount || amount <= 0) {
+      return res.status(400).json({ error: 'Invalid payment data' });
     }
-  } catch (err) { res.status(500).json({ error: err.message }); }
+    
+    // Check if reservation exists
+    const [reservation] = await pool.query(
+      'SELECT * FROM Reservation WHERE Reservation_ID = ?',
+      [reservationId]
+    );
+    
+    if (reservation.length === 0) {
+      return res.status(404).json({ error: 'Reservation not found' });
+    }
+    
+    // Insert payment directly (allows payment for room + services)
+    await pool.query(
+      'INSERT INTO Payment (Reservation_ID, Amount, Payment_Method, Status) VALUES (?, ?, ?, ?)',
+      [reservationId, amount, method, 'Completed']
+    );
+    
+    res.json({ message: 'Payment recorded successfully' });
+  } catch (err) { 
+    res.status(500).json({ error: err.message }); 
+  }
 });
 
 module.exports = router;
