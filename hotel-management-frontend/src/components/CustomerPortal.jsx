@@ -16,10 +16,14 @@ export default function CustomerPortal({ user, onLogout }) {
     loadMyBookings();
   }, []);
 
-  const loadRooms = async () => {
+  const loadRooms = async (checkIn = null, checkOut = null) => {
     setLoading(true);
     try {
-      const res = await API.get('/rooms');
+      let url = '/rooms/available';
+      if (checkIn && checkOut) {
+        url += `?checkIn=${checkIn}&checkOut=${checkOut}`;
+      }
+      const res = await API.get(url);
       setRooms(res.data);
     } catch (err) {
       showMessage('error', 'Failed to load rooms');
@@ -37,12 +41,17 @@ export default function CustomerPortal({ user, onLogout }) {
       
       setRoomServices(roomServicesRes.data);
       
-      // Find current user's guest ID
-      const currentGuest = guestsRes.data.find(g => g.Email === user.email);
+      // Find current user's guest ID (case-insensitive email comparison)
+      const currentGuest = guestsRes.data.find(g => 
+        g.Email && user.email && g.Email.toLowerCase() === user.email.toLowerCase()
+      );
+      
       if (currentGuest) {
         // Filter bookings by guest ID
         const userBookings = reservationsRes.data.filter(b => b.Guest_ID === currentGuest.Guest_ID);
         setMyBookings(userBookings);
+      } else {
+        setMyBookings([]);
       }
     } catch (err) {
       console.error('Failed to load bookings');
@@ -72,7 +81,7 @@ export default function CustomerPortal({ user, onLogout }) {
     if (filter.category && room.Category !== filter.category) return false;
     if (filter.minPrice && room.Rent < parseFloat(filter.minPrice)) return false;
     if (filter.maxPrice && room.Rent > parseFloat(filter.maxPrice)) return false;
-    if (room.Status !== 'Available') return false;
+    // No need to check Status since backend already filters by availability
     return true;
   });
 
@@ -83,27 +92,25 @@ export default function CustomerPortal({ user, onLogout }) {
     }
 
     try {
-      // First, create guest if not exists
-      const guestRes = await API.post('/guests', {
+      // Create or get existing guest (backend handles duplicates)
+      const guestCreateRes = await API.post('/guests', {
         Name: user.name,
         Contact_Info: '0000000000',
         Email: user.email,
         Nationality: 'India',
         Gender: 'Other'
-      }).catch(() => null); // Guest might already exist
+      });
 
-      // Get guest ID
-      const guestsRes = await API.get('/guests');
-      const guest = guestsRes.data.find(g => g.Email === user.email);
+      const guestId = guestCreateRes.data.insertedId;
 
-      if (!guest) {
-        showMessage('error', 'Failed to create guest profile');
+      if (!guestId) {
+        showMessage('error', 'Failed to create guest profile. Please try again.');
         return;
       }
 
       // Create reservation
       const reservationRes = await API.post('/reservations', {
-        guestId: guest.Guest_ID,
+        guestId: guestId,
         roomNo: roomNo,
         checkIn: bookingForm.checkIn,
         checkOut: bookingForm.checkOut
@@ -207,7 +214,13 @@ export default function CustomerPortal({ user, onLogout }) {
                     type="date"
                     className="form-input"
                     value={bookingForm.checkIn}
-                    onChange={(e) => setBookingForm({ ...bookingForm, checkIn: e.target.value })}
+                    onChange={(e) => {
+                      const newCheckIn = e.target.value;
+                      setBookingForm({ ...bookingForm, checkIn: newCheckIn });
+                      if (newCheckIn && bookingForm.checkOut) {
+                        loadRooms(newCheckIn, bookingForm.checkOut);
+                      }
+                    }}
                     min={new Date().toISOString().split('T')[0]}
                   />
                 </div>
@@ -217,7 +230,13 @@ export default function CustomerPortal({ user, onLogout }) {
                     type="date"
                     className="form-input"
                     value={bookingForm.checkOut}
-                    onChange={(e) => setBookingForm({ ...bookingForm, checkOut: e.target.value })}
+                    onChange={(e) => {
+                      const newCheckOut = e.target.value;
+                      setBookingForm({ ...bookingForm, checkOut: newCheckOut });
+                      if (bookingForm.checkIn && newCheckOut) {
+                        loadRooms(bookingForm.checkIn, newCheckOut);
+                      }
+                    }}
                     min={bookingForm.checkIn || new Date().toISOString().split('T')[0]}
                   />
                 </div>

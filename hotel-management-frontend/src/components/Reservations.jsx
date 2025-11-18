@@ -15,18 +15,32 @@ export default function Reservations() {
 
   const loadData = async () => {
     try {
-      const [reservationsRes, guestsRes, roomsRes, roomServicesRes] = await Promise.all([
+      const [reservationsRes, guestsRes, roomServicesRes] = await Promise.all([
         API.get('/reservations'),
         API.get('/guests'),
-        API.get('/rooms'),
         API.get('/room-services')
       ]);
       setReservations(reservationsRes.data);
       setGuests(guestsRes.data);
-      setRooms(roomsRes.data.filter(r => r.Status === 'Available'));
       setRoomServices(roomServicesRes.data);
+      
+      // Load all rooms initially
+      await loadAvailableRooms();
     } catch (err) {
       showMessage('error', 'Failed to load data');
+    }
+  };
+
+  const loadAvailableRooms = async (checkIn = null, checkOut = null) => {
+    try {
+      let url = '/rooms/available';
+      if (checkIn && checkOut) {
+        url += `?checkIn=${checkIn}&checkOut=${checkOut}`;
+      }
+      const roomsRes = await API.get(url);
+      setRooms(roomsRes.data);
+    } catch (err) {
+      console.error('Failed to load available rooms');
     }
   };
 
@@ -136,7 +150,13 @@ export default function Reservations() {
               type="date"
               className="form-input"
               value={form.checkIn}
-              onChange={(e) => setForm({ ...form, checkIn: e.target.value })}
+              onChange={(e) => {
+                const newCheckIn = e.target.value;
+                setForm({ ...form, checkIn: newCheckIn, roomNo: '' });
+                if (newCheckIn && form.checkOut) {
+                  loadAvailableRooms(newCheckIn, form.checkOut);
+                }
+              }}
               min={new Date().toISOString().split('T')[0]}
             />
           </div>
@@ -146,7 +166,13 @@ export default function Reservations() {
               type="date"
               className="form-input"
               value={form.checkOut}
-              onChange={(e) => setForm({ ...form, checkOut: e.target.value })}
+              onChange={(e) => {
+                const newCheckOut = e.target.value;
+                setForm({ ...form, checkOut: newCheckOut, roomNo: '' });
+                if (form.checkIn && newCheckOut) {
+                  loadAvailableRooms(form.checkIn, newCheckOut);
+                }
+              }}
               min={form.checkIn || new Date().toISOString().split('T')[0]}
             />
           </div>

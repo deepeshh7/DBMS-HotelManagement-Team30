@@ -11,6 +11,39 @@ router.get('/', async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+// GET available rooms for a date range
+router.get('/available', async (req, res) => {
+  try {
+    const { checkIn, checkOut } = req.query;
+    
+    if (!checkIn || !checkOut) {
+      // If no dates provided, return all rooms
+      const [rows] = await pool.query('SELECT * FROM Room ORDER BY Room_No');
+      return res.json(rows);
+    }
+
+    // Get rooms that are NOT booked during the requested date range
+    const query = `
+      SELECT r.* 
+      FROM Room r
+      WHERE r.Room_No NOT IN (
+        SELECT res.Room_No 
+        FROM Reservation res
+        WHERE res.Status IN ('Confirmed', 'CheckedIn')
+        AND NOT (
+          res.Check_Out_Date <= ? OR res.Check_In_Date >= ?
+        )
+      )
+      ORDER BY r.Room_No
+    `;
+    
+    const [rows] = await pool.query(query, [checkIn, checkOut]);
+    res.json(rows);
+  } catch (err) { 
+    res.status(500).json({ error: err.message }); 
+  }
+});
+
 // POST add/update room
 router.post('/', async (req, res) => {
   try {

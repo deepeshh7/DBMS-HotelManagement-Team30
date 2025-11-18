@@ -121,9 +121,7 @@ export default function Guests() {
             </select>
           </div>
           <div className="form-group">
-            <button className="btn btn-primary" onClick={add}>
-              Add Guest
-            </button>
+    
           </div>
         </div>
       </div>
